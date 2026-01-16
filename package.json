@@ -1,0 +1,23 @@
+{
+  "name": "out_of",
+  "version": "1.0.0",
+  "description": "A movie logging API",
+  "license": "ISC",
+  "author": "kareedesuka",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./src/server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.1.2",
+    "nodemon": "^3.1.11",
+    "zod": "^4.3.5"
+  }
+}

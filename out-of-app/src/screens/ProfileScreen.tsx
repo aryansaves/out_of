@@ -1,38 +1,114 @@
 import React, { useEffect, useState } from "react";
-import { Button, ScrollView, Text, View } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getMyProfile } from "../api/user";
 import { useAuth } from "../auth/AuthContext";
-import { useNavigation } from "@react-navigation/native";
+import ProfileHeader from "../components/ProfileHeader";
+import PosterRow from "../components/PosterRow";
+import MenuButton from "../components/MenuButton";
+
+interface MediaEntry {
+  _id: string;
+  title: string;
+  type: string;
+  ratingOverall?: number;
+}
+
+interface ProfileData {
+  username: string;
+  bio?: string;
+  mediaWatched: number;
+  top: MediaEntry[];
+  recentLogs: MediaEntry[];
+}
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigation = useNavigation<any>();
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await getMyProfile();
-        setProfile(data);
+        const res = await getMyProfile();
+        setProfile(res.data);
       } catch (e: any) {
         setError(e?.response?.data?.message ?? "Failed to load profile");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
 
-  return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Button title="Logout" onPress={signOut} />
-      <Button title="Open Diary" onPress={() => navigation.navigate("Diary")} />
-      {!!error && <Text style={{ color: "red", marginTop: 12 }}>{error}</Text>}
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <ActivityIndicator color="#ffffff" size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-      <ScrollView style={{ marginTop: 16 }}>
-        <Text style={{ fontSize: 16, fontWeight: "600" }}>Profile:</Text>
-        <Text style={{ marginTop: 8, fontFamily: "monospace" }}>
-          {JSON.stringify(profile, null, 2)}
-        </Text>
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <Text style={styles.error}>{error}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <MenuButton onLogout={signOut} />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {profile && (
+          <>
+            <ProfileHeader
+              username={profile.username}
+              mediaWatched={profile.mediaWatched}
+            />
+            <PosterRow title="Top 4" entries={profile.top.slice(0, 4)} />
+            <PosterRow title="Recent" entries={profile.recentLogs.slice(0, 4)} />
+          </>
+        )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+  },
+  error: {
+    color: "#ff6b6b",
+    fontSize: 14,
+  },
+});

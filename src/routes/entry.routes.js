@@ -10,8 +10,9 @@ router.use(protect)
 
 router.post("/", validatezod(zodschema.createEntrySchema), mediacontroller.createEntry)
 router.get("/", mediacontroller.getEntries)
+router.get("/tmdb/:tmdbId", mediacontroller.getEntryByTmdbId)
 router.get("/:id", mediacontroller.getEntryById)
-router.put("/:id",validatezod(zodschema.updateEntrySchema), mediacontroller.updateEntry)
+router.put("/:id", validatezod(zodschema.updateEntrySchema), mediacontroller.updateEntry)
 router.delete("/:id", mediacontroller.deleteEntry)
 
 export default router

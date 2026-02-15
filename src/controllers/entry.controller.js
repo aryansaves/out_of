@@ -179,10 +179,39 @@ const deleteEntry = async (req, res, next) => {
   }
 };
 
+// GET /entries/tmdb/:tmdbId - Check if movie is logged by tmdbId
+const getEntryByTmdbId = async (req, res, next) => {
+  try {
+    const { tmdbId } = req.params;
+
+    const entry = await MediaEntry.findOne({
+      userId: req.user.id,
+      tmdbId: parseInt(tmdbId, 10)
+    });
+
+    if (!entry) {
+      return res.status(200).json({
+        success: true,
+        logged: false,
+        data: null
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      logged: true,
+      data: entry
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createEntry,
   getEntries,
   getEntryById,
+  getEntryByTmdbId,
   updateEntry,
   deleteEntry
 };

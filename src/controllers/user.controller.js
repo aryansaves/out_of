@@ -2,41 +2,41 @@ import User from "../models/User.js"
 import MediaEntry from "../models/MediaEntry.js"
 
 const getMyProfile = async (req, res, next) => {
-    try {
-        const user = await User.findById(req.user.id).select("username bio createdAt")
-        if(!user){
-            return res.status(404).json({
-                success : false,
-                message : "User not Found"
-            })
-        }
-        const mediaWatched = await MediaEntry.countDocuments({userId: user._id})
-
-        const top = await MediaEntry.find({userId: user._id})
-            .select("type title ratingOverall remarks dateLogged")
-            .sort({ratingOverall: -1, dateLogged: -1, createdAt: -1})
-            .limit(10)
-        
-        const recentLogs = await MediaEntry.find({userId: user._id})
-            .select("type title ratingOverall remarks dateLogged")
-            .sort({ dateLogged: -1, createdAt: -1 })
-            .limit(10);
-
-        res.status(200).json({
-            success : true,
-            data: {
-                username : user.username,
-                bio : user.bio,
-                joinedAt : user.createdAt,
-                mediaWatched,
-                top,
-                recentLogs
-            }
-        })
-
-    } catch(error) {
-        next(error)
+  try {
+    const user = await User.findById(req.user.id).select("username bio createdAt")
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not Found"
+      })
     }
+    const mediaWatched = await MediaEntry.countDocuments({ userId: user._id })
+
+    const top = await MediaEntry.find({ userId: user._id })
+      .select("type title tmdbId posterPath ratingOverall remarks dateLogged")
+      .sort({ ratingOverall: -1, dateLogged: -1, createdAt: -1 })
+      .limit(10)
+
+    const recentLogs = await MediaEntry.find({ userId: user._id })
+      .select("type title tmdbId posterPath ratingOverall remarks dateLogged")
+      .sort({ dateLogged: -1, createdAt: -1 })
+      .limit(10);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        username: user.username,
+        bio: user.bio,
+        joinedAt: user.createdAt,
+        mediaWatched,
+        top,
+        recentLogs
+      }
+    })
+
+  } catch (error) {
+    next(error)
+  }
 }
 const getPublicProfile = async (req, res, next) => {
   try {
@@ -95,4 +95,4 @@ const getPublicProfile = async (req, res, next) => {
   }
 };
 
-export default {getPublicProfile, getMyProfile}
+export default { getPublicProfile, getMyProfile }

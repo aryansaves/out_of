@@ -7,11 +7,13 @@ const seasonRatingSchema = z.object({
   remarks: z.string().max(500).optional()
 });
 
-const seasonRatingsSchema = z.record(seasonRatingSchema); 
+const seasonRatingsSchema = z.record(seasonRatingSchema);
 
 const baseEntrySchema = z.object({
   type: z.enum(["movie", "series"]),
   title: z.string().min(1).max(200),
+  tmdbId: z.number().int().positive().optional(),
+  posterPath: z.string().max(200).optional(),
   dateLogged: z.coerce.date().optional(),
   ratingOverall: rating7,
   remarks: z.string().max(1000).optional(),
@@ -53,8 +55,8 @@ const createEntrySchema = baseEntrySchema.superRefine((data, ctx) => {
 const updateEntrySchema = baseEntrySchema
   .partial()
   .superRefine((data, ctx) => {
-    
-    
+
+
     if (data.type === "movie") {
       if (data.seasonWiseEnabled === true) {
         ctx.addIssue({
